@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -26,7 +27,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
-    ProgressBar progressBar;
     NestedScrollView nestedScrollView;
     ArrayList<MainData> dataArrayList = new ArrayList<>();
     MainAdapter adapter;
@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
 
         nestedScrollView = findViewById(R.id.scroll_view);
         recyclerView = findViewById(R.id.recycler_view);
-        progressBar = findViewById(R.id.progress_bar);
 
         adapter = new MainAdapter(MainActivity.this,dataArrayList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -54,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
                 if (scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()){
 
                     page++;
-                    progressBar.setVisibility(View.VISIBLE);
                     getData(page,limit);
                 }
                 System.out.println("<<<<<<<<<<<  "+page);
@@ -63,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getData(int page , int limit) {
+        final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this) ;
+        progressDialog.setMessage("Loading...........");
+        progressDialog.show();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://picsum.photos/")
                 .addConverterFactory(ScalarsConverterFactory.create())
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<String> call, Response<String> response) {
 
                 if (response.isSuccessful()&& response.body()!= null){
-                    progressBar.setVisibility(View.GONE);
+                    progressDialog.dismiss();
                     try {
                         JSONArray jsonArray = new JSONArray(response.body());
                         parseResult(jsonArray);
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
 
 
 
